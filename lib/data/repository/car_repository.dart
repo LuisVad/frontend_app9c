@@ -11,7 +11,7 @@ class CarRepository {
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(car.toJson()..remove('id')),
+      body: jsonEncode(car.toJson()..remove('id')), // No enviar 'id' al crear
     );
 
     if (response.statusCode != 200) {
@@ -20,6 +20,9 @@ class CarRepository {
   }
 
   Future<void> updateCar(CarModel car) async {
+    if (car.id == null) {
+      throw Exception('Car id is required for update');
+    }
     final response = await http.put(
       Uri.parse('$apiUrl/${car.id}'),
       headers: <String, String>{
@@ -36,6 +39,9 @@ class CarRepository {
   Future<void> deleteCar(String id) async {
     final response = await http.delete(
       Uri.parse('$apiUrl/$id'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
     );
 
     if (response.statusCode != 200) {

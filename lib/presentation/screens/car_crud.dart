@@ -18,7 +18,7 @@ class CarListView extends StatelessWidget {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) => CarForm(),
+            builder: (context) => const CarForm(),
           );
         },
         child: const Icon(Icons.add),
@@ -67,7 +67,7 @@ class _CarListScreenState extends State<CarListScreen> {
                     final car = cars[index];
                     return ListTile(
                       title: Text(car.mark),
-                      subtitle: Text(car.model),
+                      subtitle: Text('${car.model}, ${car.owner}'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -127,7 +127,7 @@ class _CarListScreenState extends State<CarListScreen> {
 class CarForm extends StatefulWidget {
   final CarModel? car;
 
-  CarForm({Key? key, this.car}) : super(key: key);
+  const CarForm({Key? key, this.car}) : super(key: key);
 
   @override
   _CarFormState createState() => _CarFormState();
@@ -135,18 +135,22 @@ class CarForm extends StatefulWidget {
 
 class _CarFormState extends State<CarForm> {
   final _formKey = GlobalKey<FormState>();
+  late TextEditingController _ownerController;
   late TextEditingController _markController;
   late TextEditingController _modelController;
   late TextEditingController _autonomyController;
   late TextEditingController _topSpeedController;
+  late TextEditingController _horsePowerController;
 
   @override
   void initState() {
     super.initState();
-    _markController = TextEditingController(text: widget.car?.mark);
-    _modelController = TextEditingController(text: widget.car?.model);
-    _autonomyController = TextEditingController(text: widget.car?.autonomy.toString());
-    _topSpeedController = TextEditingController(text: widget.car?.topSpeed.toString());
+    _ownerController = TextEditingController(text: widget.car?.owner ?? '');
+    _markController = TextEditingController(text: widget.car?.mark ?? '');
+    _modelController = TextEditingController(text: widget.car?.model ?? '');
+    _autonomyController = TextEditingController(text: widget.car?.autonomy.toString() ?? '');
+    _topSpeedController = TextEditingController(text: widget.car?.topSpeed.toString() ?? '');
+    _horsePowerController = TextEditingController(text: widget.car?.horsePower.toString() ?? '');
   }
 
   @override
@@ -160,6 +164,16 @@ class _CarFormState extends State<CarForm> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            TextFormField(
+              controller: _ownerController,
+              decoration: const InputDecoration(labelText: 'Owner'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter an owner';
+                }
+                return null;
+              },
+            ),
             TextFormField(
               controller: _markController,
               decoration: const InputDecoration(labelText: 'Mark'),
@@ -185,7 +199,7 @@ class _CarFormState extends State<CarForm> {
               decoration: const InputDecoration(labelText: 'Autonomy'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a autonomy';
+                  return 'Please enter autonomy';
                 }
                 return null;
               },
@@ -196,6 +210,16 @@ class _CarFormState extends State<CarForm> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a top speed';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              controller: _horsePowerController,
+              decoration: const InputDecoration(labelText: 'Horse Power'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter horse power';
                 }
                 return null;
               },
@@ -216,10 +240,12 @@ class _CarFormState extends State<CarForm> {
             if (_formKey.currentState!.validate()) {
               final car = CarModel(
                 id: widget.car?.id,
+                owner: _ownerController.text,
                 mark: _markController.text,
                 model: _modelController.text,
                 autonomy: double.parse(_autonomyController.text),
                 topSpeed: double.parse(_topSpeedController.text),
+                horsePower: double.parse(_horsePowerController.text),
               );
               if (widget.car == null) {
                 carCubit.createCar(car).then((_) => carCubit.fetchAllCars());

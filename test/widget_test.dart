@@ -15,8 +15,8 @@ void main() {
   testWidgets('Car List Screen displays cars and navigates to Add Car Screen', (WidgetTester tester) async {
     // Mock data
     final mockCars = [
-      CarModel(id: '1', mark: 'Toyota', model: 'Corolla', autonomy: 500, topSpeed: 180),
-      CarModel(id: '2', mark: 'Ford', model: 'Focus', autonomy: 450, topSpeed: 200),
+      CarModel(id: '1', mark: 'Toyota', model: 'Corolla', autonomy: 500, topSpeed: 180, owner: 'John', horsePower: 150),
+      CarModel(id: '2', mark: 'Ford', model: 'Focus', autonomy: 450, topSpeed: 200, owner: 'Alice', horsePower: 160),
     ];
 
     // Mock Cubit
@@ -28,10 +28,7 @@ void main() {
       BlocProvider<CarCubit>.value(
         value: carCubit,
         child: MaterialApp(
-          home: CarListView(),
-          routes: {
-            '/add': (context) => CarForm(),
-          },
+          home: const CarListView(),
         ),
       ),
     );
@@ -49,23 +46,35 @@ void main() {
   });
 
   testWidgets('Add Car Screen allows input and submits car', (WidgetTester tester) async {
+    // Mock Cubit
+    final carCubit = MockCarCubit();
+    when(carCubit.state).thenReturn(CarInitial());
+
     await tester.pumpWidget(
-      MaterialApp(
-        home: CarForm(),
+      BlocProvider<CarCubit>.value(
+        value: carCubit,
+        child: MaterialApp(
+          home: const CarForm(),
+        ),
       ),
     );
 
     // Enter car details
-    await tester.enterText(find.byType(TextFormField).at(0), 'Toyota');
-    await tester.enterText(find.byType(TextFormField).at(1), 'Camry');
-    await tester.enterText(find.byType(TextFormField).at(2), '450');
-    await tester.enterText(find.byType(TextFormField).at(3), '190');
+    await tester.enterText(find.byType(TextFormField).at(0), 'John'); // Owner
+    await tester.enterText(find.byType(TextFormField).at(1), 'Toyota'); // Mark
+    await tester.enterText(find.byType(TextFormField).at(2), 'Camry'); // Model
+    await tester.enterText(find.byType(TextFormField).at(3), '450'); // Autonomy
+    await tester.enterText(find.byType(TextFormField).at(4), '190'); // Top Speed
+    await tester.enterText(find.byType(TextFormField).at(5), '150'); // Horse Power
 
     // Tap the submit button
-    await tester.tap(find.byType(ElevatedButton));
+    await tester.tap(find.byType(TextButton).at(1)); // Asegúrate de que el índice corresponda al botón de guardar
     await tester.pumpAndSettle();
 
-    // Verify that we return to the Car List Screen
+    // Verify that createCar was called
+    verify(carCubit.createCar(any)).called(1);
+
+    // Verify that we return to the Car List Screen (assuming you navigate back on save)
     expect(find.text('Car List'), findsOneWidget); // Verifica el texto correcto según el título en tu pantalla de lista de vehículos
   });
 }
