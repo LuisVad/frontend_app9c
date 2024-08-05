@@ -135,6 +135,7 @@ class CarForm extends StatefulWidget {
 
 class _CarFormState extends State<CarForm> {
   final _formKey = GlobalKey<FormState>();
+  late TextEditingController _idController;
   late TextEditingController _ownerController;
   late TextEditingController _markController;
   late TextEditingController _modelController;
@@ -145,6 +146,7 @@ class _CarFormState extends State<CarForm> {
   @override
   void initState() {
     super.initState();
+    _idController = TextEditingController(text: widget.car?.id ?? '');
     _ownerController = TextEditingController(text: widget.car?.owner ?? '');
     _markController = TextEditingController(text: widget.car?.mark ?? '');
     _modelController = TextEditingController(text: widget.car?.model ?? '');
@@ -164,6 +166,16 @@ class _CarFormState extends State<CarForm> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            TextFormField(
+              controller: _idController,
+              decoration: const InputDecoration(labelText: 'ID'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter an ID';
+                }
+                return null;
+              },
+            ),
             TextFormField(
               controller: _ownerController,
               decoration: const InputDecoration(labelText: 'Owner'),
@@ -239,7 +251,7 @@ class _CarFormState extends State<CarForm> {
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               final car = CarModel(
-                id: widget.car?.id,
+                id: _idController.text, // Usa el valor del ID del formulario
                 owner: _ownerController.text,
                 mark: _markController.text,
                 model: _modelController.text,

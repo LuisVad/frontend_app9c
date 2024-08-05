@@ -20,6 +20,9 @@ class CarCubit extends Cubit<CarState> {
   }
 
   Future<void> updateCar(CarModel car) async {
+    if (car.id == null) {
+      throw Exception('Car id is required for update');
+    }
     try {
       emit(CarLoading());
       await carRepository.updateCar(car);
