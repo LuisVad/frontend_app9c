@@ -1,0 +1,23 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.3-stable.tar.xz # Download Flutter (replace with latest version URL)
+        - tar xf flutter_linux_*.tar.xz # Extract the downloaded archive
+        - export PATH="$PATH:`pwd`/flutter/bin" # Add Flutter to PATH
+        - flutter doctor -v # Verify installation
+        - flutter pub get # Install dependencies (if your project has any)
+    build:
+      commands:
+        - flutter build web --release  # Compile the app for web (release mode)
+  artifacts:
+    baseDirectory: build/web
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - .dart_tool
+      - .flutter-plugins
+      - .pub-cache
+      - build
